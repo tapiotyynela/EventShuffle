@@ -7,8 +7,6 @@ import {
 } from "sequelize";
 import sequelize from "../db/index";
 import EventDate from "./eventDate";
-import Person from "./person";
-
 class Event extends Model<
   InferAttributes<Event>,
   InferCreationAttributes<Event>

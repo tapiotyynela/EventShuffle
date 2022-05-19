@@ -1,7 +1,10 @@
 import { Transaction } from "sequelize/types";
 import Person from "../models/person";
 
-export const findOrCreatePerson = async (name: string, t?: Transaction) => {
+export const findOrCreatePerson = async (
+  name: string,
+  t?: Transaction
+): Promise<Person> => {
   const person = await Person.findOne({
     where: {
       name: name,

@@ -1,10 +1,15 @@
-export type NewEvent = {
+export type NewEventBody = {
   name: string;
   dates: string[];
 };
 
-export interface Event {
-  eventId: number;
+export type SuitableDateResult = {
+  date: string;
+  people: string[];
+};
+
+export type EventResultsResponse = {
+  id: number;
   name: string;
-  EventDates: { date: string }[];
-}
+  suitableDates: SuitableDateResult[];
+};

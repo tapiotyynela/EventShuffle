@@ -1,32 +1,30 @@
-import { Request, Response } from "express";
-import { format } from "sequelize/types/utils";
 import { isArraysEqual } from "../helpers/arrayHelpers";
 import Event from "../models/event";
 import EventDate from "../models/eventDate";
 import Person from "../models/person";
 import Vote from "../models/vote";
+import { EventResultsResponse, SuitableDateResult } from "../types/event";
 
-export const getAllEvents = async () => {
+export const getAllEvents = async (): Promise<Event[]> => {
   return Event.findAll({ attributes: ["eventId", "name"] });
 };
 
-export const getEventById = async (id: number) => {
-  const event = await Event.findOne({
+export const getEventById = async (id: number): Promise<Event> => {
+  return Event.findOne({
     where: {
       eventId: id,
     },
     attributes: ["eventId", "name"],
     include: [{ model: EventDate }],
   });
-  return event;
 };
 
 export const findSuitableDateForEveryone = (
   voters: string[],
-  dateOptions: { date: string; people: string[] }[]
-) => {
-  let suitableDates = [];
-  dateOptions.forEach((d) => {
+  dateOptions: SuitableDateResult[]
+): SuitableDateResult[] => {
+  let suitableDates: SuitableDateResult[] = [];
+  dateOptions.forEach((d: SuitableDateResult) => {
     if (isArraysEqual(d.people, voters)) {
       suitableDates.push(d);
     }
@@ -34,17 +32,23 @@ export const findSuitableDateForEveryone = (
   return suitableDates;
 };
 
-const findMostSuitableDate = (eventDates: EventDate[]) => {
-  let allVoterNames = [];
-  const formatted = eventDates.map((ed) => {
-    const names = ed.Votes.map((v) => v.Person.name);
+// format peoples votes so we can see who have voted which date
+export const formatFindMostSuitableDate = (
+  eventDates: EventDate[]
+): SuitableDateResult[] => {
+  let allVoterNames: string[] = [];
+
+  const formatted = eventDates.map((ed: EventDate) => {
+    const names: string[] = ed.Votes.map((v) => v.Person.name);
     allVoterNames = allVoterNames.concat(names);
+
     return {
       date: ed.date,
       people: names,
     };
   });
-  const allDistinctVoters = [...new Set(allVoterNames)];
+
+  const allDistinctVoters: string[] = [...new Set(allVoterNames)];
   const suitableDates = findSuitableDateForEveryone(
     allDistinctVoters,
     formatted
@@ -52,7 +56,9 @@ const findMostSuitableDate = (eventDates: EventDate[]) => {
   return suitableDates;
 };
 
-const findEventWithSuitableDates = async (eventId: number) => {
+export const findEventWithSuitableDates = async (
+  eventId: number
+): Promise<EventResultsResponse> => {
   const event = await Event.findOne({
     where: {
       eventId: eventId,
@@ -74,7 +80,7 @@ const findEventWithSuitableDates = async (eventId: number) => {
     ],
   });
 
-  const formattedVotingData = findMostSuitableDate(event.EventDates);
+  const formattedVotingData = formatFindMostSuitableDate(event.EventDates);
   return {
     id: event.eventId,
     name: event.name,
@@ -82,19 +88,6 @@ const findEventWithSuitableDates = async (eventId: number) => {
   };
 };
 
-export const createEvent = async (name: string) => {
+export const createEvent = async (name: string): Promise<Event> => {
   return Event.create({ name });
-};
-
-export const getEventResults = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    const eventWithSuitableDates = await findEventWithSuitableDates(
-      parseInt(id)
-    );
-
-    res.send(eventWithSuitableDates);
-  } catch (error) {
-    res.status(500).send("Something went wrong");
-  }
 };

@@ -4,12 +4,13 @@ import VoteEventDate from "../models/voteEventDate";
 import Person from "../models/person";
 import EventDate from "../models/eventDate";
 import { findDateByEventIdAndDate } from "./eventDate";
+import { SuitableDateResult } from "../types/event";
 
 export const createVote = async (
   voteGiver: number,
   eventId: number,
   t?: Transaction
-) => {
+): Promise<Vote> => {
   return Vote.create(
     {
       person: voteGiver,
@@ -23,7 +24,7 @@ const createVoteEventDate = async (
   voteId: number,
   eventDateId: number,
   t?: Transaction
-) => {
+): Promise<VoteEventDate> => {
   return VoteEventDate.create(
     {
       voteId,
@@ -33,8 +34,8 @@ const createVoteEventDate = async (
   );
 };
 
-const getEventVotes = async (eventId: number) => {
-  const votes = await Vote.findAll({
+const getEventVotes = async (eventId: number): Promise<Vote[]> => {
+  return Vote.findAll({
     where: {
       event: eventId,
     },
@@ -43,7 +44,6 @@ const getEventVotes = async (eventId: number) => {
       { model: EventDate, attributes: ["date"] },
     ],
   });
-  return votes;
 };
 
 export const addVoteToDates = async (
@@ -51,18 +51,20 @@ export const addVoteToDates = async (
   votes: string[],
   eventId: number,
   t: Transaction
-) => {
-  const dates = await Promise.all(
+): Promise<string[]> => {
+  return Promise.all(
     votes.map(async (v: string) => {
       const eventDate = await findDateByEventIdAndDate(eventId, v);
       await createVoteEventDate(vote.voteId, eventDate.eventDateId, t);
       return eventDate.date;
     })
   );
-  return dates;
 };
 
-export const groupVotesByDate = async (eventId: number, dates: EventDate[]) => {
+export const groupVotesByDate = async (
+  eventId: number,
+  dates: EventDate[]
+): Promise<SuitableDateResult[]> => {
   const votes = await getEventVotes(eventId);
   const votedDates = dates.map((date) => {
     let personsVotedDate = [];
