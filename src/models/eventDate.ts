@@ -1,11 +1,13 @@
 import { Model, InferAttributes, InferCreationAttributes, CreationOptional, DataTypes } from 'sequelize'
 import sequelize from '../db/index'
 import Event from './event'
+import Vote from './vote'
 
 class EventDate extends Model<InferAttributes<EventDate>, InferCreationAttributes<EventDate>> {
     declare eventDateId: CreationOptional<number>
     declare date: string
     declare event: number
+    declare Votes?: Vote[]
 }
 
 EventDate.init({

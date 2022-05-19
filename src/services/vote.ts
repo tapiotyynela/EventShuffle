@@ -1,16 +1,12 @@
-import sequelize from "../db"
 import { Transaction } from "sequelize/types"
 import { Request, Response } from "express"
 import Vote from "../models/vote"
 import VoteEventDate from "../models/voteEventDate"
 import Person from "../models/person"
 import EventDate from "../models/eventDate"
-import { findOrCreatePerson } from "./person"
-import { getEventById } from "./event"
 import { findDateByEventIdAndDate } from "./eventDate"
 
-
-const createVote = async (voteGiver: number, eventId: number, t?: Transaction) => {
+export const createVote = async (voteGiver: number, eventId: number, t?: Transaction) => {
     return Vote.create({
         person: voteGiver,
         event: eventId
@@ -37,14 +33,16 @@ const getEventVotes = async (eventId: number) => {
     return votes
 }
 
-const addVoteToDates = async (vote: Vote, votes: string[], eventId: number, t: Transaction) => {
-    await Promise.all(votes.map(async (v: string) => {
+export const addVoteToDates = async (vote: Vote, votes: string[], eventId: number, t: Transaction) => {
+    const dates = await Promise.all(votes.map(async (v: string) => {
         const eventDate = await findDateByEventIdAndDate(eventId, v)
         await createVoteEventDate(vote.voteId, eventDate.eventDateId, t)
+        return eventDate.date
     }))
+    return dates
 }
 
-const groupVotesByDate = async (eventId: number, dates: any) => {
+export const groupVotesByDate = async (eventId: number, dates: EventDate[]) => {
     const votes = await getEventVotes(eventId)
     const votedDates = dates.map(date => {
         let personsVotedDate = []
@@ -58,29 +56,9 @@ const groupVotesByDate = async (eventId: number, dates: any) => {
         if (personsVotedDate.length > 0) {
             return {
                 date: date.date,
-                persons: personsVotedDate
+                people: personsVotedDate
             }
         }
     })
     return votedDates
-}
-
-export const addVote = async (req: Request, res: Response) => {
-    try {
-        const { id } = req.params // eventId
-        const { name, votes } = req.body // votes is array of date strings
-        await sequelize.transaction(async (t) => {
-            const event = await getEventById(parseInt(id))
-            const person = await findOrCreatePerson(name, t)
-            const vote = await createVote(person.personId, event.eventId, t)
-            await addVoteToDates(vote, votes, event.eventId, t)
-            const groupedVotes = await groupVotesByDate(event.eventId, event.EventDates)
-            res.status(200).send({
-                event,
-                votes: groupedVotes
-            })
-        })
-    } catch (error) {
-        res.send('Something went wrong')
-    }
 }

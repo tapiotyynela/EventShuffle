@@ -6,8 +6,8 @@
   "scripts": {
     "start": "nodemon -r dotenv/config --watch './**/*.ts' --exec ts-node src/app.ts",
     "lint": "eslint . ext .ts",
-    "test": "tsc && jest --setupFiles dotenv/config",
-    "build": "tsc"
+    "test": "npm run build && jest --setupFiles dotenv/config",
+    "build": "rm -rf ./js/ && tsc"
   },
   "author": "Tapio Tyynelä",
   "license": "ISC",

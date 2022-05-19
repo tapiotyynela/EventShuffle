@@ -1,4 +1,5 @@
 import EventDate from "../models/eventDate"
+import Vote from "../models/vote"
 
 export const findDateByEventIdAndDate = async (eventId: number, date: string) => {
     const eventDate = await EventDate.findOne({
@@ -11,10 +12,19 @@ export const findDateByEventIdAndDate = async (eventId: number, date: string) =>
 }
 
 export const findDatesOfEvent = async (eventId: number) => {
-    const eventDates = await EventDate.findAll({
+    return await EventDate.findAll({
         where: {
             event: eventId,
-        }
+        },
+        include: Vote
     })
-    return eventDates
+}
+
+export const createEventDates = async (dates: string[], eventId: number) => {
+    return Promise.all(dates.map(async (date) => {
+        await EventDate.create({
+            date,
+            event: eventId
+        })
+    }))
 }
