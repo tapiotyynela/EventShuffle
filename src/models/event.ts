@@ -1,28 +1,39 @@
-import { Model, InferAttributes, InferCreationAttributes, CreationOptional, DataTypes } from 'sequelize'
-import sequelize from '../db/index'
-import EventDate from './eventDate'
-import Person from './person'
+import {
+  Model,
+  InferAttributes,
+  InferCreationAttributes,
+  CreationOptional,
+  DataTypes,
+} from "sequelize";
+import sequelize from "../db/index";
+import EventDate from "./eventDate";
+import Person from "./person";
 
-class Event extends Model<InferAttributes<Event>, InferCreationAttributes<Event>> {
-    declare eventId: CreationOptional<number>
-    declare name: string
-    declare EventDates?: EventDate[]
+class Event extends Model<
+  InferAttributes<Event>,
+  InferCreationAttributes<Event>
+> {
+  declare eventId: CreationOptional<number>;
+  declare name: string;
+  declare EventDates?: EventDate[];
 }
 
-Event.init({
+Event.init(
+  {
     eventId: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
     },
     name: {
-        type: DataTypes.STRING,
-        allowNull: false,
+      type: DataTypes.STRING,
+      allowNull: false,
     },
-}
-,{
-    tableName: 'event',
+  },
+  {
+    tableName: "event",
     sequelize,
-})
+  }
+);
 
-export default Event
+export default Event;

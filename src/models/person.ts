@@ -1,34 +1,44 @@
-import { Model, InferAttributes, InferCreationAttributes, CreationOptional, DataTypes } from 'sequelize'
-import sequelize from '../db/index'
-import Vote from './vote'
+import {
+  Model,
+  InferAttributes,
+  InferCreationAttributes,
+  CreationOptional,
+  DataTypes,
+} from "sequelize";
+import sequelize from "../db/index";
+import Vote from "./vote";
 
-class Person extends Model<InferAttributes<Person>, InferCreationAttributes<Person>> {
-    declare personId: CreationOptional<number>
-    declare name: string
+class Person extends Model<
+  InferAttributes<Person>,
+  InferCreationAttributes<Person>
+> {
+  declare personId: CreationOptional<number>;
+  declare name: string;
 }
 
-Person.init({
+Person.init(
+  {
     personId: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
     },
     name: {
-        type: DataTypes.STRING,
-        allowNull: false,
+      type: DataTypes.STRING,
+      allowNull: false,
     },
-}
-,{
-    tableName: 'person',
+  },
+  {
+    tableName: "person",
     sequelize,
-})
+  }
+);
 
 Person.hasMany(Vote, {
-    foreignKey: 'person'
-})
+  foreignKey: "person",
+});
 Vote.belongsTo(Person, {
-    foreignKey: 'person'
-})
+  foreignKey: "person",
+});
 
-
-export default Person
+export default Person;
