@@ -23,7 +23,7 @@ export const findSuitableDateForEveryone = (
   voters: string[],
   dateOptions: SuitableDateResult[]
 ): SuitableDateResult[] => {
-  let suitableDates: SuitableDateResult[] = [];
+  const suitableDates: SuitableDateResult[] = [];
   dateOptions.forEach((d: SuitableDateResult) => {
     if (isArraysEqual(d.people, voters)) {
       suitableDates.push(d);
